@@ -42,8 +42,8 @@ const issueBook = asyncHandler(async (req, res) => {
   });
 
   // Decrease available copies
-  book.availableCopies -= 1;
-  await book.save();
+  
+  BookController.updateBookCopy(bookId, "decrement");
 
   const populatedLoan = await Loan.findById(loan._id)
     .populate('user', 'id')
@@ -64,7 +64,7 @@ const issueBook = asyncHandler(async (req, res) => {
 // @access  Public
 const returnBook = asyncHandler(async (req, res) => {
   const { loanId } = req.body;
-
+  const BookController = require('./bookController');
   const loan = await Loan.findById(loanId)
     .populate('book')
     .populate('user', 'name email');
@@ -85,8 +85,7 @@ const returnBook = asyncHandler(async (req, res) => {
 
   // Increase available copies
   const book = BookController.getBook(loan.book._id);
-  book.availableCopies += 1;
-  await book.save();
+  BookController.updateBookCopy(loan.book._id, "increment");
 
   res.json({
     id: loan._id,
@@ -173,26 +172,30 @@ const extendLoan = asyncHandler(async (req, res) => {
     throw new Error('Only active loans can be extended');
   }
 
-  if (loan.extensionsCount >= 2) {
+  if (loan.extensionsCount >= 5) {
     res.status(400);
     throw new Error('Maximum extensions reached');
   }
 
-  const newDueDate = moment(loan.dueDate).add(extensionDays, 'days').toDate();
-  loan.dueDate = newDueDate;
-  loan.extensionsCount += 1;
-  await loan.save();
-
-  res.json({
-    id: loan._id,
-    user: loan.user,
-    book: loan.book,
-    issueDate: loan.issueDate,
-    originalDueDate: loan.originalDueDate,
-    extendedDueDate: loan.dueDate,
-    status: loan.status,
-    extensionsCount: loan.extensionsCount
-  });
+   // Use the *current* dueDate for the extension
+  //  console.log('loan.dueDate:', loan.dueDate);
+  //  console.log('extensionDays:', extensionDays);
+   const newDueDate = moment(loan.dueDate).add(extensionDays, 'days').toDate();
+   console.log('New Due Date:', newDueDate);  // Keep this for debugging
+   //loan.dueDate = newDueDate; // Correctly update the dueDate
+   loan.extensionsCount += 1;
+   await loan.save();
+ 
+   res.json({
+     id: loan._id,
+     user: loan.user,
+     book: loan.book,
+     issueDate: loan.issueDate,
+     originalDueDate: loan.originalDueDate,
+     extendedDueDate: loan.dueDate, // Use the updated dueDate here
+     status: loan.status,
+     extensionsCount: loan.extensionsCount,
+   });
 });
 
 const getPopularBooks=asyncHandler(async () => {
@@ -206,7 +209,7 @@ const getPopularBooks=asyncHandler(async () => {
     { $sort: { borrowCount: -1 } },
     { $limit: 10 }
   ]);
-  console.log('Popular Books:', popularBooks);
+  //console.log('Popular Books:', popularBooks);
   return popularBooks;
 });
 
@@ -272,6 +275,15 @@ const getActiveUsersData = async () => {
   return activeUsers;
 };
 
+const checkActiveLoansForBook = async (bookId) => {
+  const activeLoansCount = await Loan.countDocuments({ 
+    book: bookId, 
+    status: { $in: ['ACTIVE', 'OVERDUE'] } 
+  });
+console.log('Active Loans Count:', activeLoansCount);
+  return activeLoansCount;
+};
+
 module.exports = {
   issueBook,
   returnBook,
@@ -280,5 +292,6 @@ module.exports = {
   extendLoan,
   getPopularBooks,
   getSystemOverview,
-  getActiveUsersData
+  getActiveUsersData,
+  checkActiveLoansForBook
 };

@@ -1,6 +1,5 @@
 const asyncHandler = require('express-async-handler');
 const Book = require('../models/Book');
-const LoanController = require('./loanController');
 // @desc    Add a new book
 // @route   POST /api/books
 // @access  Public
@@ -136,18 +135,16 @@ const updateBook = asyncHandler(async (req, res) => {
 // @access  Public
 const deleteBook = asyncHandler(async (req, res) => {
   const book = await Book.findById(req.params.id);
-
+  const LoanController = require('./loanController');
   if (book) {
-    // Check if there are any active loans for this book
-    // const activeLoans = await Loan.countDocuments({ 
-    //   book: book._id, 
-    //   status: { $in: ['ACTIVE', 'OVERDUE'] } 
-    // });
-
-    // if (activeLoans > 0) {
-    //   res.status(400);
-    //   throw new Error('Cannot delete book with active loans');
-    // }
+    //Check if there are any active loans for this book
+    const activeLoans = await LoanController.checkActiveLoansForBook(book._id);
+    console.log('Active Loans:', activeLoans);
+      
+    if (activeLoans > 0) {
+      res.status(400);
+      throw new Error('Cannot delete book with active loans');
+    }
 
     await book.remove();
     res.status(204).json({ message: 'Book removed' });
@@ -163,16 +160,16 @@ const deleteBook = asyncHandler(async (req, res) => {
 const getThePopularBooks = asyncHandler(async (req, res) => {
   const LoanController = require('./loanController');
   const popularBooks = await LoanController.getPopularBooks();
-  //console.log('Popular Books', popularBooks);
+  console.log('Popular Books', popularBooks);
   if (!popularBooks) {
     res.status(404);
     throw new Error('No popular books found');
   }
 
   const bookIds = popularBooks.map(book => book._id);
-  //console.log('Book IDs:', bookIds);
+  console.log('Book IDs:', bookIds);
   const books = await Book.find({ _id: { $in: bookIds } });
-
+  console.log('Books:', books);
   const result = popularBooks.map(book => {
     const bookInfo = books.find(b => b._id.equals(book._id));
     return {
@@ -199,6 +196,35 @@ const getAvailableCopies = async () => {
   return (result && result[0] && result[0].total) || 0;
 };
 
+const updateBookCopy = async (bookId, operation) => {
+  try {
+    const book = await Book.findById(bookId);
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    if (operation === "increment") {
+      book.availableCopies += 1;
+    } else if (operation === "decrement") {
+      if (book.availableCopies <= 0) {
+        throw new Error("No available copies to decrement");
+      }
+      book.availableCopies -= 1;
+    } else {
+      throw new Error(`Invalid operation: ${operation}. Must be 'increment' or 'decrement'.`);
+    }
+
+    await book.save();
+    return {
+      id: book._id,
+      available_copies: book.availableCopies,
+      updatedAt: book.updatedAt
+    };
+  } catch (error) {
+    console.error("Error updating book availability:", error.message);
+    throw error; // Re-throw the error so the loan controller can handle it
+  }
+};
 
 
 module.exports = {
@@ -210,5 +236,6 @@ module.exports = {
   getBook,
   getThePopularBooks,
   countBooks,
-  getAvailableCopies
+  getAvailableCopies,
+  updateBookCopy
 };
