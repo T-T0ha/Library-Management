@@ -1,1 +1,0 @@
-sudo nginx -c /home/toha/Desktop/semest06/Library-Management/Phase03/nginx.conf -g "error_log /home/toha/Desktop/semest06/Library-Management/Phase03/logs/error.log;"

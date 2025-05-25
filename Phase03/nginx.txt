@@ -1,0 +1,30 @@
+sudo nginx -c /home/toha/Desktop/semest06/Library-Management/Phase03/nginx.conf -g "error_log /home/toha/Desktop/semest06/Library-Management/Phase03/logs/error.log;"
+
+
+
+
+
+🔧 Fix the Port Conflict
+First, let's see what's currently running on port 8081:
+ss -tlnp | grep 8081
+
+I can see that there's already a Node.js process (PID 16549) running on port 8081. This is likely your BookService that's already running. Let me kill that process and then answer your questions about restarting configurations.
+kill 16549
+
+Perfect! I killed the process that was blocking port 8081. Now your BookService should be able to start properly.
+
+📋 To Answer Your Question About Restarting Configurations:
+No, you don't need to restart the entire Nginx configuration every time! Here are the different scenarios:
+
+For Nginx Configuration Changes:
+Option 1: Reload (Recommended - No Downtime)
+sudo nginx -s reload
+
+
+Option 2: Test then Reload
+sudo nginx -t  # Test configuration first
+sudo nginx -s reload  # Apply changes if test passes
+
+Option 3: Full Restart (Only if reload doesn't work)
+sudo nginx -s stop
+sudo nginx -c /path/to/your/nginx.conf

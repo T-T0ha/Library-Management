@@ -20,3 +20,5 @@
 127.0.0.1 - - [24/May/2025:02:57:32 +0600] "GET /api/loans/stats/overview HTTP/1.1" 200 157 "-" "PostmanRuntime/7.44.0"
 127.0.0.1 - - [24/May/2025:02:58:20 +0600] "GET /api/books/stats/populllarBooks HTTP/1.1" 404 169 "-" "PostmanRuntime/7.44.0"
 127.0.0.1 - - [24/May/2025:02:58:31 +0600] "GET /api/books/stats/popularBooks HTTP/1.1" 200 104 "-" "PostmanRuntime/7.44.0"
+127.0.0.1 - - [25/May/2025:01:08:31 +0600] "GET /api/books/stats/popularBooks HTTP/1.1" 200 104 "-" "PostmanRuntime/7.44.0"
+127.0.0.1 - - [25/May/2025:09:57:40 +0600] "GET /api/users/ HTTP/1.1" 200 359 "-" "curl/7.81.0"

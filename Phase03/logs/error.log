@@ -10,3 +10,11 @@
 2025/05/24 02:53:23 [emerg] 32565#32565: bind() to 0.0.0.0:80 failed (98: Unknown error)
 2025/05/24 02:53:23 [emerg] 32565#32565: bind() to 0.0.0.0:80 failed (98: Unknown error)
 2025/05/24 02:53:23 [emerg] 32565#32565: still could not bind()
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32341 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32340 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32342 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32343 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32344 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32345 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32347 exited on signal 9
+2025/05/24 03:12:57 [alert] 32339#32339: worker process 32346 exited on signal 9
